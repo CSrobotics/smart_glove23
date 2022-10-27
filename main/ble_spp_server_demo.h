@@ -34,6 +34,7 @@
 #include "esp_bt_main.h"
 
 #include "bno055.h"
+#include "tca9548.h"
 
 #define DEFAULT_VREF    3300        //Use adc2_vref_to_gpio() to obtain a better estimate
 #define NO_OF_SAMPLES   64          //Multisampling

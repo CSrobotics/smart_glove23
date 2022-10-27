@@ -12,13 +12,13 @@ esp_timer_handle_t periodic_timer;
 void xyz2rgb(float x, float y, float z, float *r, float *g, float *b);
 void matMult(float m2[3], float m1[3][3], float r[3]);
 
-static const uint8_t spp_adv_data[19] = {
+static const uint8_t spp_adv_data[20] = {
     /* Flags */
     0x02,0x01,0x06,
     /* Complete List of 16-bit Service Class UUIDs */
     0x03,0x03,0xF0,0xAB,
     /* Complete Local Name in advertising */
-    0x0B,0x09, 'S', 'M', 'A', 'R', 'T', '_', 'G', 'R', 'I', 'P'
+    0x0B,0x09, 'S', 'M', 'A', 'R', 'T', '_', 'G', 'L', 'O', 'V', 'E'
 };
 
 static uint16_t spp_mtu_size = 23;
@@ -698,7 +698,7 @@ void app_main(void)
 
     adc_init();
     custom_gpio_config();
-#ifdef bno055_use
+#ifdef bno055_use1
     bno055_config_t bno_conf;
     i2c_number_t i2c_num = 0;
 

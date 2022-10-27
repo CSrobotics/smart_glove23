@@ -19,6 +19,21 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>esp_idf_components/ads111x/ads111x.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ads111x/ads111x.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/ads130e08/ads130e08.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ads130e08/ads130e08.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/aht/aht.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/aht/aht.c</location>
+		</link>
+		<link>
 			<name>esp_idf_components/app_trace/app_trace.c</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/app_trace/app_trace.c</location>
@@ -44,6 +59,46 @@
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/app_update/esp_ota_ops.c</location>
 		</link>
 		<link>
+			<name>esp_idf_components/bh1750/bh1750.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/bh1750/bh1750.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/bh1900nux/bh1900nux.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/bh1900nux/bh1900nux.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/bme680/bme680.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/bme680/bme680.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/bmp180/bmp180.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/bmp180/bmp180.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/bmp280/bmp280.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/bmp280/bmp280.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/button/button.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/button/button.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/ccs811/ccs811.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ccs811/ccs811.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/color/color.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/color/color.c</location>
+		</link>
+		<link>
 			<name>esp_idf_components/console/commands.c</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/console/commands.c</location>
@@ -67,6 +122,11 @@
 			<name>esp_idf_components/cxx/cxx_guards.cpp</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/cxx/cxx_guards.cpp</location>
+		</link>
+		<link>
+			<name>esp_idf_components/dht/dht.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/dht/dht.c</location>
 		</link>
 		<link>
 			<name>esp_idf_components/driver/adc.c</name>
@@ -212,6 +272,36 @@
 			<name>esp_idf_components/driver/uart.c</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/driver/uart.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/ds1302/ds1302.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ds1302/ds1302.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/ds1307/ds1307.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ds1307/ds1307.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/ds18x20/ds18x20.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ds18x20/ds18x20.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/ds3231/ds3231.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ds3231/ds3231.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/ds3502/ds3502.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ds3502/ds3502.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/encoder/encoder.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/encoder/encoder.c</location>
 		</link>
 		<link>
 			<name>esp_idf_components/esp-tls/esp_tls.c</name>
@@ -444,6 +534,21 @@
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/esp_websocket_client/esp_websocket_client.c</location>
 		</link>
 		<link>
+			<name>esp_idf_components/example/example.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/example/example.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/framebuffer/fbanimation.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/framebuffer/fbanimation.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/framebuffer/framebuffer.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/framebuffer/framebuffer.c</location>
+		</link>
+		<link>
 			<name>esp_idf_components/freertos/FreeRTOS-openocd.c</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/freertos/FreeRTOS-openocd.c</location>
@@ -664,6 +769,16 @@
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/hal/wdt_hal_iram.c</location>
 		</link>
 		<link>
+			<name>esp_idf_components/hd44780/hd44780.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/hd44780/hd44780.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/hdc1000/hdc1000.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/hdc1000/hdc1000.c</location>
+		</link>
+		<link>
 			<name>esp_idf_components/heap/heap_caps.c</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/heap/heap_caps.c</location>
@@ -684,6 +799,76 @@
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/heap/multi_heap.c</location>
 		</link>
 		<link>
+			<name>esp_idf_components/hmc5883l/hmc5883l.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/hmc5883l/hmc5883l.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/ht16k33/ht16k33.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ht16k33/ht16k33.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/hts221/hts221.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/hts221/hts221.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/hx711/hx711.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/hx711/hx711.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/i2cdev/i2cdev.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/i2cdev/i2cdev.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/ina219/ina219.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ina219/ina219.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/ina260/ina260.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ina260/ina260.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/ina3221/ina3221.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ina3221/ina3221.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/lc709203f/lc709203f.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/lc709203f/lc709203f.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/led_strip/led_strip.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/led_strip/led_strip.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/led_strip_spi/led_strip_spi.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/led_strip_spi/led_strip_spi.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/led_strip_spi/led_strip_spi_sk9822.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/led_strip_spi/led_strip_spi_sk9822.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/lib8tion/lib8tion.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/lib8tion/lib8tion.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/lm75/lm75.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/lm75/lm75.c</location>
+		</link>
+		<link>
 			<name>esp_idf_components/log/log.c</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/log/log.c</location>
@@ -699,6 +884,61 @@
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/log/log_freertos.c</location>
 		</link>
 		<link>
+			<name>esp_idf_components/ls7366r/ls7366r.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ls7366r/ls7366r.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/max31725/max31725.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/max31725/max31725.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/max31855/max31855.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/max31855/max31855.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/max31865/max31865.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/max31865/max31865.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/max7219/max7219.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/max7219/max7219.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/mcp23008/mcp23008.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/mcp23008/mcp23008.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/mcp23x17/mcp23x17.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/mcp23x17/mcp23x17.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/mcp342x/mcp342x.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/mcp342x/mcp342x.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/mcp4725/mcp4725.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/mcp4725/mcp4725.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/mcp960x/mcp960x.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/mcp960x/mcp960x.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/mcp9808/mcp9808.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/mcp9808/mcp9808.c</location>
+		</link>
+		<link>
 			<name>esp_idf_components/mdns/mdns.c</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/mdns/mdns.c</location>
@@ -712,6 +952,16 @@
 			<name>esp_idf_components/mdns/mdns_networking_lwip.c</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/mdns/mdns_networking_lwip.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/mhz19b/mhz19b.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/mhz19b/mhz19b.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/ms5611/ms5611.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ms5611/ms5611.c</location>
 		</link>
 		<link>
 			<name>esp_idf_components/newlib/abort.c</name>
@@ -789,6 +1039,46 @@
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/newlib/time.c</location>
 		</link>
 		<link>
+			<name>esp_idf_components/noise/noise.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/noise/noise.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/onewire/onewire.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/onewire/onewire.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/pca9557/pca9557.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/pca9557/pca9557.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/pca9685/pca9685.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/pca9685/pca9685.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/pcf8563/pcf8563.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/pcf8563/pcf8563.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/pcf8574/pcf8574.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/pcf8574/pcf8574.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/pcf8575/pcf8575.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/pcf8575/pcf8575.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/pcf8591/pcf8591.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/pcf8591/pcf8591.c</location>
+		</link>
+		<link>
 			<name>esp_idf_components/perfmon/xtensa_perfmon_access.c</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/perfmon/xtensa_perfmon_access.c</location>
@@ -824,6 +1114,26 @@
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/pthread/pthread_rwlock.c</location>
 		</link>
 		<link>
+			<name>esp_idf_components/qmc5883l/qmc5883l.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/qmc5883l/qmc5883l.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/rda5807m/rda5807m.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/rda5807m/rda5807m.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/scd30/scd30.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/scd30/scd30.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/scd4x/scd4x.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/scd4x/scd4x.c</location>
+		</link>
+		<link>
 			<name>esp_idf_components/sdmmc/sdmmc_cmd.c</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/sdmmc/sdmmc_cmd.c</location>
@@ -852,6 +1162,31 @@
 			<name>esp_idf_components/sdmmc/sdmmc_sd.c</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/sdmmc/sdmmc_sd.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/sgp40/sensirion_voc_algorithm.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/sgp40/sensirion_voc_algorithm.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/sgp40/sgp40.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/sgp40/sgp40.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/sht3x/sht3x.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/sht3x/sht3x.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/sht4x/sht4x.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/sht4x/sht4x.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/si7021/si7021.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/si7021/si7021.c</location>
 		</link>
 		<link>
 			<name>esp_idf_components/soc/lldesc.c</name>
@@ -959,6 +1294,21 @@
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/spiffs/spiffs_api.c</location>
 		</link>
 		<link>
+			<name>esp_idf_components/sts21/sts21.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/sts21/sts21.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/tca9548/tca9548.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/tca9548/tca9548.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/tca95x5/tca95x5.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/tca95x5/tca95x5.c</location>
+		</link>
+		<link>
 			<name>esp_idf_components/tcp_transport/transport.c</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/tcp_transport/transport.c</location>
@@ -984,6 +1334,31 @@
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/tcpip_adapter/tcpip_adapter_compat.c</location>
 		</link>
 		<link>
+			<name>esp_idf_components/tda74xx/tda74xx.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/tda74xx/tda74xx.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/tsl2561/tsl2561.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/tsl2561/tsl2561.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/tsl2591/tsl2591.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/tsl2591/tsl2591.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/tsl4531/tsl4531.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/tsl4531/tsl4531.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/tsys01/tsys01.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/tsys01/tsys01.c</location>
+		</link>
+		<link>
 			<name>esp_idf_components/ulp/ulp.c</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ulp/ulp.c</location>
@@ -992,6 +1367,11 @@
 			<name>esp_idf_components/ulp/ulp_macro.c</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ulp/ulp_macro.c</location>
+		</link>
+		<link>
+			<name>esp_idf_components/ultrasonic/ultrasonic.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/ultrasonic/ultrasonic.c</location>
 		</link>
 		<link>
 			<name>esp_idf_components/unity/unity_port_esp32.c</name>
@@ -1062,6 +1442,11 @@
 			<name>esp_idf_components/wear_levelling/wear_levelling.cpp</name>
 			<type>1</type>
 			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/wear_levelling/wear_levelling.cpp</location>
+		</link>
+		<link>
+			<name>esp_idf_components/wiegand/wiegand.c</name>
+			<type>1</type>
+			<location>C:/Espressif/frameworks/esp-idf-v4.4/components/wiegand/wiegand.c</location>
 		</link>
 		<link>
 			<name>esp_idf_components/xtensa/eri.c</name>
