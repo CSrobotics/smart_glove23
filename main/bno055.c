@@ -21,6 +21,7 @@
    
 static const char *TAG = "bno055";
 
+static bno055_device_t x_bno_dev[I2C_NUM_MAX];
 
 static uint8_t x_buffer[200];  // we so far are using only 20 bytes max
 
@@ -33,44 +34,38 @@ static uint8_t x_buffer[200];  // we so far are using only 20 bytes max
 // | start | write chip_addr + rd_bit, chk_ack | read 1 byte, nack | stop |
 // --------|-----------------------------------|-------------------|------|
 esp_err_t bno055_read_register(i2c_number_t i2c_num, bno055_reg_t reg, uint8_t *p_reg_val){
-    
-//    if( !x_bno_dev[i2c_num].bno_is_open) {
-//        ESP_LOGE(TAG, "bno055_read_register(): device is not open");
-//        return BNO_ERR_NOT_OPEN; //TODO: make error list
-//    }
-
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    
-    // making the command - begin 
+
+    // making the command - begin
     i2c_master_start(cmd);  // start condition
     // device address with write bit
-    i2c_master_write_byte(cmd, (x_bno_dev[i2c_num].i2c_address << 1) | WRITE_BIT, ACK_CHECK_EN); 
+    i2c_master_write_byte(cmd, (x_bno_dev[i2c_num].i2c_address << 1) | WRITE_BIT, ACK_CHECK_EN);
     // send the register address
-    i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);   
+    i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
     i2c_master_start(cmd);  // start condition again
     // device address with read bit
-    i2c_master_write_byte(cmd, (x_bno_dev[i2c_num].i2c_address << 1) | READ_BIT, ACK_CHECK_EN);   
+    i2c_master_write_byte(cmd, (x_bno_dev[i2c_num].i2c_address << 1) | READ_BIT, ACK_CHECK_EN);
     // read byte, issue NACK
-    i2c_master_read_byte(cmd, p_reg_val, NACK_VAL); 
+    i2c_master_read_byte(cmd, p_reg_val, NACK_VAL);
     i2c_master_stop(cmd);  // stop condition
-    // making the command - end 
-    
+    // making the command - end
+
     // Now execute the command
     esp_err_t err = i2c_master_cmd_begin(i2c_num, cmd, 1000 / portTICK_RATE_MS);
-    
+
     i2c_cmd_link_delete(cmd);
-    
+
     switch (err) {
-        case ESP_OK: 
+        case ESP_OK:
             break;
         case  ESP_ERR_TIMEOUT:
             ESP_LOGE(TAG, "bno055_read_register(): i2c timeout");
             break;
-        default: 
+        default:
             ESP_LOGE(TAG, "bno055_read_register(): failed");
     }
-    
-    return err;   
+
+    return err;
 }
   
 // ______________________________________________________________________________________________________
@@ -78,41 +73,36 @@ esp_err_t bno055_read_register(i2c_number_t i2c_num, bno055_reg_t reg, uint8_t *
 // --------|-----------------------------------|-------------------------|-----------------------|------|
 
  esp_err_t bno055_write_register(i2c_number_t i2c_num, bno055_reg_t reg, uint8_t reg_val){
-    
-    if( !x_bno_dev[i2c_num].bno_is_open) {
-        ESP_LOGE(TAG, "bno055_write_register(): device is not open");
-        return BNO_ERR_NOT_OPEN;
-    }
-    
+
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    
-    // making the command - begin 
+
+    // making the command - begin
     i2c_master_start(cmd);  // start condition
     // device address with write bit
-    i2c_master_write_byte(cmd, (x_bno_dev[i2c_num].i2c_address << 1) | WRITE_BIT, ACK_CHECK_EN); 
+    i2c_master_write_byte(cmd, (x_bno_dev[i2c_num].i2c_address << 1) | WRITE_BIT, ACK_CHECK_EN);
     // send the register address
-    i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);   
+    i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
     // write byte, issue NACK
-    i2c_master_write_byte(cmd, reg_val, ACK_CHECK_EN); 
+    i2c_master_write_byte(cmd, reg_val, ACK_CHECK_EN);
     i2c_master_stop(cmd);  // stop condition
-    // making the command - end 
-    
+    // making the command - end
+
     // Now execute the command
     esp_err_t err = i2c_master_cmd_begin(i2c_num, cmd, 1000 / portTICK_RATE_MS);
-    
+
     i2c_cmd_link_delete(cmd);
-    
+
     switch (err) {
-        case ESP_OK: 
+        case ESP_OK:
             break;
         case  ESP_ERR_TIMEOUT:
             ESP_LOGE(TAG, "bno055_write_register(): i2c timeout");
             break;
-        default: 
+        default:
             ESP_LOGE(TAG, "bno055_write_register(): failed");
     }
-    
-    return err;   
+
+    return err;
 }
  
 // _______________________________________________________________________
@@ -123,11 +113,6 @@ esp_err_t bno055_read_register(i2c_number_t i2c_num, bno055_reg_t reg, uint8_t *
 // --------|-----------------------------------|---------------------|-------------------|------|
  
 esp_err_t bno055_read_data(i2c_number_t i2c_num, bno055_reg_t start_reg, uint8_t *buffer, uint8_t n_bytes){
-
-    if( !x_bno_dev[i2c_num].bno_is_open) {
-        ESP_LOGE(TAG, "bno055_read_data(): device is not open");
-        return BNO_ERR_NOT_OPEN;
-    }
 
     if( n_bytes < 2 || n_bytes > 0x7F ) {
         ESP_LOGE(TAG, "bno055_read_data(): invalid number of bytes: %d", n_bytes);
@@ -175,7 +160,7 @@ esp_err_t bno055_read_data(i2c_number_t i2c_num, bno055_reg_t start_reg, uint8_t
 
 esp_err_t bno055_set_default_conf(bno055_config_t * p_bno_conf){
 
-    p_bno_conf->i2c_address = BNO055_ADDRESS_A;          // BNO055_ADDRESS_A or BNO055_ADDRESS_B 
+    p_bno_conf->i2c_address = BNO055_ADDRESS_A;          // BNO055_ADDRESS_A or BNO055_ADDRESS_B
     p_bno_conf->sda_io_num = 19;        // GPIO number for I2C sda signal 25
     p_bno_conf->sda_pullup_en = GPIO_PULLUP_ENABLE;  // Internal GPIO pull mode for I2C sda signal
     p_bno_conf->scl_io_num = 18;        // GPIO number for I2C scl signal 26
@@ -184,7 +169,7 @@ esp_err_t bno055_set_default_conf(bno055_config_t * p_bno_conf){
     p_bno_conf->timeout = 10000*80;     // 10ms in 80 MHz ticks, should be < 0xFFFFF
     p_bno_conf->use_ext_oscillator = false; // Use external oscillator
     p_bno_conf->clk_flags = 0;
-    return ESP_OK;   
+    return ESP_OK;
 }
 
 
@@ -192,68 +177,32 @@ esp_err_t bno055_set_default_conf(bno055_config_t * p_bno_conf){
 esp_err_t bno055_open(i2c_number_t i2c_num, bno055_config_t * p_bno_conf )
 {
     if(i2c_num >= I2C_NUMBER_MAX) return ESP_ERR_INVALID_ARG;
-    
-    // Check if already in use
-    if(x_bno_dev[i2c_num].bno_is_open) {
-        ESP_LOGW(TAG, "bno055_open(): device is already open");
-        return BNO_ERR_ALREADY_OPEN;
-    }
-    x_bno_dev[i2c_num].bno_is_open = 0;
 
-    i2c_config_t conf;
-    conf.mode = I2C_MODE_MASTER;
-    conf.sda_io_num = p_bno_conf->sda_io_num;        
-    conf.sda_pullup_en = p_bno_conf->sda_pullup_en;  
-    conf.scl_io_num = p_bno_conf->scl_io_num;        
-    conf.scl_pullup_en = p_bno_conf->scl_pullup_en;  
-    conf.master.clk_speed = p_bno_conf->clk_speed;
-    conf.clk_flags = p_bno_conf->clk_flags;
     esp_err_t err;
-    err = i2c_param_config(i2c_num, &conf);
-    ESP_LOGD(TAG, "i2c_param_config() returned 0x%02X", err);
-    if( err != ESP_OK ) return err;
 
-    err = i2c_driver_install(i2c_num, I2C_MODE_MASTER,
-                              I2C_MASTER_RX_BUF_DISABLE,
-                              I2C_MASTER_TX_BUF_DISABLE, 0);
-    ESP_LOGD(TAG, "i2c_driver_install() returned 0x%02X", err);
-    if( err != ESP_OK ) return err;
-    
-    err = i2c_set_timeout(i2c_num, p_bno_conf->timeout);
-    ESP_LOGD(TAG, "i2c_set_timeout() returned 0x%02X", err);
-    if( err != ESP_OK ) return err;
     x_bno_dev[i2c_num].i2c_address = p_bno_conf->i2c_address;
-    
+
     // Read BNO055 Chip ID to make sure we have a connection
-    x_bno_dev[i2c_num].bno_is_open = 1; // bno055_read_register() checks this flag
     uint8_t reg_val;
-
     err = bno055_read_register(i2c_num, BNO055_CHIP_ID_ADDR, & reg_val);
-
     if( err == ESP_OK ) {
-        
+
         ESP_LOGD(TAG, "BNO055 ID returned 0x%02X", reg_val);
         if( reg_val == BNO055_ID ) {
             ESP_LOGI(TAG, "BNO055 detected \n");
-        } 
+        }
         else {
-            ESP_LOGE(TAG, "bno055_open() error: BNO055 NOT detected");
+            ESP_LOGI(TAG, "bno055_open() error: BNO055 NOT detected");
             goto errExit;
         }
     }
-    
-    
+
+
      // Switch to config mode
     err = bno055_write_register(i2c_num, BNO055_OPR_MODE_ADDR, OPERATION_MODE_CONFIG);
     if(err != ESP_OK) goto errExit;
     vTaskDelay(30 / portTICK_RATE_MS);
     ESP_LOGD(TAG, "Set config oper. mode - Ok");
-
-//    // Reset
-//    err=bno055_write_register(i2c_num, BNO055_SYS_TRIGGER_ADDR, 0x20 );
-//    if(err != ESP_OK) goto errExit;
-//    vTaskDelay(700 / portTICK_RATE_MS);
-//    ESP_LOGD(TAG, "BNO055 reset - Ok");
 
     // Set ext oscillator
     if(p_bno_conf->use_ext_oscillator) {
@@ -262,50 +211,50 @@ esp_err_t bno055_open(i2c_number_t i2c_num, bno055_config_t * p_bno_conf )
         vTaskDelay(20 / portTICK_RATE_MS);
     }
     ESP_LOGD(TAG, "Set external oscillator - Ok");
-    
+
     // TODO: turn off sleep mode
-    
-    // Set power mode to normal 
+
+    // Set power mode to normal
     err=bno055_write_register(i2c_num, BNO055_PWR_MODE_ADDR, POWER_MODE_NORMAL);
     if(err != ESP_OK) goto errExit;
     vTaskDelay(20 / portTICK_RATE_MS);
     ESP_LOGD(TAG, "Set normal power mode - Ok");
 
-    return ESP_OK;   
-    
-errExit:
-    bno055_close (i2c_num);
-    return err;
-}
+    return ESP_OK;
 
+	errExit:
+		bno055_close(i2c_num);
+		return err;
+}
 
 
 esp_err_t bno055_close (i2c_number_t i2c_num )
 {
     x_bno_dev[i2c_num].bno_is_open = 0;
     return i2c_driver_delete(i2c_num);
-  
+
 }
 
+
 esp_err_t bno055_get_chip_info(i2c_number_t i2c_num, bno055_chip_info_t* chip_inf){
-    
+
     memset(chip_inf, 0, sizeof(bno055_chip_info_t));
-    
+
     esp_err_t err = bno055_read_data(i2c_num, BNO055_CHIP_ID_ADDR, x_buffer, 7);
     if( err != ESP_OK ) return err;
-    
+
     chip_inf->chip_id = x_buffer[0];
     chip_inf->accel_id = x_buffer[1];
     chip_inf->mag_id = x_buffer[2];
     chip_inf->gyro_id = x_buffer[3];
     chip_inf->sw_rev = x_buffer[4] + ((uint16_t)x_buffer[5]<<8);
     chip_inf->bl_rev = x_buffer[6];
-    
+
     return ESP_OK;
-}   
+}
 
-void bno055_displ_chip_info(bno055_chip_info_t chip_inf){
-
+void bno055_displ_chip_info(uint8_t multi_sensor, bno055_chip_info_t chip_inf){
+	printf("-----sensor %d-----\n",multi_sensor);
     printf("BNO055 Chip ID (0xA0): 0x%02X \n", chip_inf.chip_id );
     printf("Accelerometer Chip ID (0xFB): 0x%02X \n", chip_inf.accel_id );
     printf("Magnetometer Chip ID (0x32): 0x%02X \n", chip_inf.mag_id );
@@ -313,10 +262,10 @@ void bno055_displ_chip_info(bno055_chip_info_t chip_inf){
     printf("Software Revision: %d \n", chip_inf.sw_rev );
     printf("Bootloader Revision: %d \n", chip_inf.bl_rev );
 
-}   
+}
 
 esp_err_t bno055_set_opmode(i2c_number_t i2c_num, bno055_opmode_t mode ){
-    
+
     esp_err_t err=bno055_write_register(i2c_num, BNO055_OPR_MODE_ADDR, mode);
     vTaskDelay(30 / portTICK_RATE_MS);
     return err;
@@ -324,7 +273,7 @@ esp_err_t bno055_set_opmode(i2c_number_t i2c_num, bno055_opmode_t mode ){
 
 
 esp_err_t bno055_get_opmode(i2c_number_t i2c_num, bno055_opmode_t * mode ){
-    
+
     uint8_t ui_mode;
     esp_err_t err = bno055_read_register(i2c_num, BNO055_OPR_MODE_ADDR, &ui_mode);
     ui_mode = ui_mode & 0x0F; // upper 4 bits are reserved, lower 4 represent the mode
@@ -334,11 +283,11 @@ esp_err_t bno055_get_opmode(i2c_number_t i2c_num, bno055_opmode_t * mode ){
 
 // Note: should be in config mode to work!
 esp_err_t bno055_set_ext_crystal_use(i2c_number_t i2c_num, bool use_ext ){
-    
+
     bno055_opmode_t mode;
     esp_err_t err = bno055_get_opmode(i2c_num, & mode );
     if( err != ESP_OK ) return err;
-    
+
     if( mode  != OPERATION_MODE_CONFIG ) {
         ESP_LOGE(TAG, "bno055_set_ext_crystal_use(): device should be in the config mode. Current mode: %d", mode);
         return BNO_ERR_WRONG_OPMODE;
@@ -348,7 +297,7 @@ esp_err_t bno055_set_ext_crystal_use(i2c_number_t i2c_num, bool use_ext ){
     if(use_ext) reg_val = 0x80;
     else reg_val = 0;
 
-    // Set ext crystal on/off 
+    // Set ext crystal on/off
     err=bno055_write_register(i2c_num, BNO055_SYS_TRIGGER_ADDR, reg_val);
     vTaskDelay(10 / portTICK_RATE_MS);
     return err;
@@ -385,27 +334,6 @@ esp_err_t bno055_get_temperature(i2c_number_t i2c_num, uint8_t* p_temperature){
 
   esp_err_t err = bno055_read_register(i2c_num, BNO055_TEMP_ADDR, p_temperature);
   return err;
-}
-
-esp_err_t bno055_get_calib_status_byte(i2c_number_t i2c_num, uint8_t* calib) {
-	esp_err_t err;
-	err = bno055_read_register(i2c_num, BNO055_CALIB_STAT_ADDR, calib);
-    return err;
-}
-
-esp_err_t bno055_get_calib_status(i2c_number_t i2c_num, uint8_t* sys, uint8_t* gyro, uint8_t* accel, uint8_t* mag) {
-    
-    uint8_t calib_status;
-	esp_err_t err;
-	err = bno055_read_register(i2c_num, BNO055_CALIB_STAT_ADDR, &calib_status);
-    if( err != ESP_OK ) return err;
-   
-    *sys = (calib_status >> 6) & 0x03;
-    *gyro = (calib_status >> 4) & 0x03;
-    *accel = (calib_status >> 2) & 0x03;
-    *mag = calib_status & 0x03;
-    
-    return ESP_OK;
 }
 
 esp_err_t _bno055_buf_to_quaternion(uint8_t *buffer, bno055_quaternion_t* quat) {
@@ -454,7 +382,7 @@ esp_err_t bno055_get_lin_accel(i2c_number_t i2c_num, bno055_vec3_t* lin_accel) {
 
     esp_err_t err = bno055_read_data(i2c_num, BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR, x_buffer, 6);
     if( err != ESP_OK ) return err;
-    
+
     return _bno055_buf_to_lin_accel(x_buffer, lin_accel);
 }
 
@@ -477,7 +405,7 @@ esp_err_t _bno055_buf_to_gravity(uint8_t *buffer, bno055_vec3_t* gravity) {
 esp_err_t bno055_get_gravity(i2c_number_t i2c_num, bno055_vec3_t* gravity){
     esp_err_t err = bno055_read_data(i2c_num, BNO055_GRAVITY_DATA_X_LSB_ADDR, x_buffer, 6);
     if( err != ESP_OK ) return err;
-    
+
     return _bno055_buf_to_gravity(x_buffer, gravity);
 }
 
@@ -485,11 +413,11 @@ esp_err_t bno055_get_fusion_data(i2c_number_t i2c_num, bno055_quaternion_t* quat
 
     esp_err_t err = bno055_read_data(i2c_num, BNO055_QUATERNION_DATA_W_LSB_ADDR, x_buffer, 20);
     if( err != ESP_OK ) return err;
-    
+
     _bno055_buf_to_quaternion(x_buffer, quat);
     _bno055_buf_to_lin_accel(x_buffer+8, lin_accel);
     _bno055_buf_to_gravity(x_buffer+14, gravity);
-    
+
     return ESP_OK;
 }
 

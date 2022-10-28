@@ -12,6 +12,29 @@ esp_timer_handle_t periodic_timer;
 void xyz2rgb(float x, float y, float z, float *r, float *g, float *b);
 void matMult(float m2[3], float m1[3][3], float r[3]);
 
+/// SPP Service
+static const uint16_t spp_service_uuid = 0xABF0;
+
+enum{
+    SPP_IDX_SVC,
+
+    SPP_IDX_SPP_DATA_RECV_CHAR,
+    SPP_IDX_SPP_DATA_RECV_VAL,
+
+    SPP_IDX_SPP_DATA_NOTIFY_CHAR,
+    SPP_IDX_SPP_DATA_NTY_VAL,
+    SPP_IDX_SPP_DATA_NTF_CFG,
+
+    SPP_IDX_SPP_COMMAND_CHAR,
+    SPP_IDX_SPP_COMMAND_VAL,
+
+    SPP_IDX_SPP_STATUS_CHAR,
+    SPP_IDX_SPP_STATUS_VAL,
+    SPP_IDX_SPP_STATUS_CFG,
+
+    SPP_IDX_NB,
+};
+
 static const uint8_t spp_adv_data[20] = {
     /* Flags */
     0x02,0x01,0x06,
@@ -246,6 +269,7 @@ static void print_write_buffer(void)
 
 uint16_t weight =0;
 bno055_euler_t euler;
+uint32_t voltage = 0;
 
 void uart_task(void *pvParameters)
 {
@@ -608,12 +632,12 @@ esp_err_t bno_err;
 static void periodic_timer_callback(void* arg) //10ms_timer
 {
 
-	bno_err = bno055_read_euler_hrp(0, &euler);
+	//bno_err = bno055_read_euler_hrp(0, &euler);
 
-	if( bno_err != ESP_OK ) {
-		printf("bno055_get_quaternion() returned error: %02x \n", bno_err);
-		exit(2);
-	}
+//	if( bno_err != ESP_OK ) {
+//		printf("bno055_get_quaternion() returned error: %02x \n", bno_err);
+//		exit(2);
+//	}
 	//printf("%16lld\t%10d\t",time_mks, time_bno);
 	//printf("%.6f\t%.6f\t%.6f\t%.6f\n", quat.w, quat.x, quat.y, quat.z );
 	//printf("h: %3d r: %3d p: %3d\n",(euler.h/16),(euler.r/16),(euler.p/16));
@@ -651,30 +675,9 @@ uint adc_reading = 0;
 
 RTC_DATA_ATTR int wakeup_cnt;
 bno055_chip_info_t bno_info;
-static const char *TAG = "bno055";
-
 esp_timer_handle_t periodic_timer;
 static i2c_dev_t i2c_switch = { 0 };
-
-typedef struct
-{
-    i2c_dev_t i2c_dev;
-}bno055_dev_t;
-
-static bno055_dev_t sensors[SENSOR_COUNT] = { 0 };
-
-esp_err_t bno055_init_desc(bno055_dev_t *dev, i2c_port_t port, gpio_num_t sda_gpio, gpio_num_t scl_gpio)
-{
-    dev->i2c_dev.port = port;
-    dev->i2c_dev.addr = BNO055_ADDRESS_A;
-    dev->i2c_dev.cfg.sda_io_num = sda_gpio;
-    dev->i2c_dev.cfg.scl_io_num = scl_gpio;
-#if HELPER_TARGET_IS_ESP32
-    dev->i2c_dev.cfg.master.clk_speed = 1000000;
-#endif
-
-    return i2c_dev_create_mutex(&dev->i2c_dev);
-}
+bno055_device_t sensors[SENSOR_COUNT] = {0, };
 
 void app_main(void)
 {
@@ -702,57 +705,26 @@ void app_main(void)
     custom_gpio_config();
 
     esp_err_t err;
-    uint8_t reg_val;
 
+    i2c_number_t i2c_num = 0;
     i2cdev_init();
 
+    bno055_config_t bno_conf;
+    err = bno055_set_default_conf(&bno_conf);
+
+    // Initialize descriptor of the I2C switch
+    ESP_ERROR_CHECK(tca9548_init_desc(&i2c_switch, 0x70, 0, 19, 18));
     for (size_t i = 0; i < SENSOR_COUNT; i++)
     {
-    	bno055_init_desc(&sensors[i],0,19,18);
+    	ESP_ERROR_CHECK(tca9548_set_channels(&i2c_switch, BIT(i)));
+        err = bno055_open(i2c_num, &bno_conf);
+        err = bno055_set_opmode(i2c_num, OPERATION_MODE_NDOF);
+        printf(" Sensor %d : bno055_set_opmode(OPERATION_MODE_NDOF) returned 0x%02x \n",i, err);
+        err = bno055_get_chip_info(i2c_num, &bno_info);
+        bno055_displ_chip_info(i, bno_info);
+        vTaskDelay(500 / portTICK_RATE_MS);
     }
 
-    tca9548_init_desc(&i2c_switch, 0x70, 0, 19, 18);
-    for(uint8_t i=0;i<SENSOR_COUNT;i++)
-    {
-    	tca9548_set_channels(&i2c_switch, BIT(i));
-        err = bno055_read_register(0, BNO055_CHIP_ID_ADDR, &reg_val);
-
-        if( err == ESP_OK ) {
-
-            ESP_LOGD(TAG, "BNO055 ID returned 0x%02X", reg_val);
-            if( reg_val == BNO055_ID ) {
-                ESP_LOGI(TAG, "BNO055 detected \n");
-            }
-            else {
-                ESP_LOGE(TAG, "bno055_open() error: BNO055 NOT detected");
-            }
-        }
-    }
-#ifdef bno055_use1
-    bno055_config_t bno_conf;
-    i2c_number_t i2c_num = 0;
-
-    esp_err_t err;
-    err = bno055_set_default_conf(&bno_conf);
-	bno_conf.sda_io_num = 19;
-	bno_conf.scl_io_num = 18;
-    err = bno055_open(i2c_num, &bno_conf);
-    printf("bno055_open() returned 0x%02X \n", err);
-
-    if( err != ESP_OK ) {
-        printf("Program terminated!\n");
-        err = bno055_close(i2c_num);
-        printf("bno055_close() returned 0x%02X \n", err);
-        exit(1);
-    }
-
-    err = bno055_set_opmode(i2c_num, OPERATION_MODE_NDOF);
-    printf("bno055_set_opmode(OPERATION_MODE_NDOF) returned 0x%02x \n", err);
-    vTaskDelay(500 / portTICK_RATE_MS);
-
-    err = bno055_get_chip_info(i2c_num, &bno_info);
-    bno055_displ_chip_info(bno_info);
-#endif
     ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
 
     ret = esp_bt_controller_init(&bt_cfg);

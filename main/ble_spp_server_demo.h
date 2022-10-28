@@ -1,11 +1,5 @@
-/*
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
-
+#ifndef __BLE_SPP_SERVER_DEMO_H__
+#define __BLE_SPP_SERVER_DEMO_H__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,6 +26,7 @@
 #include "esp_gatts_api.h"
 #include "esp_bt_defs.h"
 #include "esp_bt_main.h"
+#include "i2cdev.h"
 
 #include "bno055.h"
 #include "tca9548.h"
@@ -69,35 +64,15 @@
 #define SPP_PROFILE_NUM             1
 #define SPP_PROFILE_APP_IDX         0
 #define ESP_SPP_APP_ID              0x56
-#define SAMPLE_DEVICE_NAME          "SMART_GRIP"    //The Device Name Characteristics in GAP
+#define SAMPLE_DEVICE_NAME          "SMART_GLOVE"    //The Device Name Characteristics in GAP
 #define SPP_SVC_INST_ID	            0
 
-/// SPP Service
-static const uint16_t spp_service_uuid = 0xABF0;
 /// Characteristic UUID
 #define ESP_GATT_UUID_SPP_DATA_RECEIVE      0xABF1
 #define ESP_GATT_UUID_SPP_DATA_NOTIFY       0xABF2
 #define ESP_GATT_UUID_SPP_COMMAND_RECEIVE   0xABF3
 #define ESP_GATT_UUID_SPP_COMMAND_NOTIFY    0xABF4
 ///Attributes State Machine
-enum{
-    SPP_IDX_SVC,
+#define CHECK_ARG(VAL) do { if (!(VAL)) return ESP_ERR_INVALID_ARG; } while (0)
 
-    SPP_IDX_SPP_DATA_RECV_CHAR,
-    SPP_IDX_SPP_DATA_RECV_VAL,
-
-    SPP_IDX_SPP_DATA_NOTIFY_CHAR,
-    SPP_IDX_SPP_DATA_NTY_VAL,
-    SPP_IDX_SPP_DATA_NTF_CFG,
-
-    SPP_IDX_SPP_COMMAND_CHAR,
-    SPP_IDX_SPP_COMMAND_VAL,
-
-    SPP_IDX_SPP_STATUS_CHAR,
-    SPP_IDX_SPP_STATUS_VAL,
-    SPP_IDX_SPP_STATUS_CFG,
-
-    SPP_IDX_NB,
-};
-
-uint32_t voltage = 0;
+#endif

@@ -1,6 +1,6 @@
 #ifndef _BNO055_H_
 #define _BNO055_H_
-
+#include "ble_spp_server_demo.h"
 #define BNO_POLLING_MS 100
 
 typedef enum{
@@ -258,7 +258,6 @@ typedef struct {
     int16_t p; /**< Euler p data */
 } bno055_euler_t;
 
-
 typedef struct {
     double  x;
     double  y;
@@ -267,11 +266,10 @@ typedef struct {
 
 typedef struct
 {
+    i2c_dev_t i2c_dev;
     bno055_addr_t  i2c_address; // BNO055_ADDRESS_A or BNO055_ADDRESS_B
     bool  bno_is_open;
 } bno055_device_t;
-
-static bno055_device_t x_bno_dev[I2C_NUM_MAX];
 
 esp_err_t bno055_set_default_conf(bno055_config_t * p_bno_conf);
 
@@ -281,7 +279,7 @@ esp_err_t bno055_read_register(i2c_number_t i2c_num, bno055_reg_t reg, uint8_t *
 esp_err_t bno055_open(i2c_number_t i2c_num, bno055_config_t * p_bno_conf );
 esp_err_t bno055_close (i2c_number_t i2c_num );
 esp_err_t bno055_get_chip_info(i2c_number_t i2c_num, bno055_chip_info_t* chip_inf);
-     void bno055_displ_chip_info(bno055_chip_info_t chip_inf);
+void bno055_displ_chip_info(uint8_t multi_sensor, bno055_chip_info_t chip_inf);
 esp_err_t bno055_set_opmode(i2c_number_t i2c_num, bno055_opmode_t mode );
 esp_err_t bno055_get_opmode(i2c_number_t i2c_num, bno055_opmode_t * mode );
 esp_err_t bno055_set_ext_crystal_use(i2c_number_t i2c_num, bool use_ext );
