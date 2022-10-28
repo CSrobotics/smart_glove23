@@ -42,13 +42,12 @@
 #define LED_R 4
 #define LED_G 17
 #define LED_B 13
-#define BUTTON_EXT_IO_NUM  34
 #define BUTTON_IO_NUM  35
 #define BUTTON_ACTIVE_LEVEL   1
 #define USB_DETECT 27
 #define CHRG 21
 
-#define HAPTIC 5
+#define SENSOR_COUNT 6
 
 #define bno055_use
 /*

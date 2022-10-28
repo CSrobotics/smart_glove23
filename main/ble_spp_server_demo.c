@@ -377,11 +377,11 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
                     	{
                     		if(p_data->write.value[1] == 0xff)
                     		{
-                    			gpio_set_level(HAPTIC, 1);
+                    			printf("haptic\n");
                     		}
                     		else if(p_data->write.value[1] == 0x00)
                     		{
-                    			gpio_set_level(HAPTIC, 0);
+                    			printf("haptic\n");
                     		}
                     	}
                     }
@@ -548,25 +548,11 @@ void SleepAndWakeup( void )
 #else
     esp_timer_stop(periodic_timer);
 
-    gpio_set_direction(LED_R, GPIO_MODE_DEF_INPUT);
-    gpio_set_direction(LED_G, GPIO_MODE_DEF_INPUT);
-    gpio_set_direction(LED_B, GPIO_MODE_DEF_INPUT);
-
-    gpio_set_pull_mode(LED_R, GPIO_PULLDOWN_ONLY);
-    gpio_set_pull_mode(LED_G, GPIO_PULLDOWN_ONLY);
-    gpio_set_pull_mode(LED_B, GPIO_PULLDOWN_ONLY);
+    custom_gpio_config();
 
     gpio_set_level(LED_R, 0);
     gpio_set_level(LED_G, 0);
     gpio_set_level(LED_B, 0);
-    gpio_set_level(HAPTIC, 0);
-
-    gpio_set_direction(CHRG, GPIO_MODE_DEF_INPUT); // CHRG
-    gpio_set_direction(USB_DETECT, GPIO_MODE_DEF_INPUT); // USB
-    gpio_set_direction(BUTTON_IO_NUM, GPIO_MODE_DEF_INPUT); // BTN
-    gpio_set_pull_mode(CHRG, GPIO_PULLUP_ONLY);
-    gpio_set_pull_mode(USB_DETECT, GPIO_PULLUP_ONLY);
-    gpio_set_pull_mode(BUTTON_IO_NUM, GPIO_PULLDOWN_ONLY);
 
     gpio_wakeup_enable(BUTTON_IO_NUM,GPIO_INTR_HIGH_LEVEL);
     gpio_wakeup_enable(USB_DETECT,GPIO_INTR_LOW_LEVEL);
@@ -582,9 +568,6 @@ void SleepAndWakeup( void )
     esp_light_sleep_start();
 
     esp_timer_start_periodic(periodic_timer, 10000); //10ms
-    gpio_set_direction(LED_R, GPIO_MODE_DEF_OUTPUT);
-    gpio_set_direction(LED_G, GPIO_MODE_DEF_OUTPUT);
-    gpio_set_direction(LED_B, GPIO_MODE_DEF_OUTPUT);
     ESP_LOGI(GATTS_TABLE_TAG, "Wakeup End");
     //esp_deep_sleep(1000);
 #endif
@@ -620,7 +603,6 @@ static void print_char_val_type(esp_adc_cal_value_t val_type)
 }
 
 uint ms10_cnt = 0;
-uint8_t ext_btn_press = 0;
 uint8_t tx_buf[14];
 esp_err_t bno_err;
 static void periodic_timer_callback(void* arg) //10ms_timer
@@ -636,7 +618,6 @@ static void periodic_timer_callback(void* arg) //10ms_timer
 	//printf("%.6f\t%.6f\t%.6f\t%.6f\n", quat.w, quat.x, quat.y, quat.z );
 	//printf("h: %3d r: %3d p: %3d\n",(euler.h/16),(euler.r/16),(euler.p/16));
 
-	ext_btn_press = gpio_get_level(BUTTON_EXT_IO_NUM);
 	ms10_cnt++;
 	if(ms10_cnt>9) // 100ms_timer
 	{
@@ -653,7 +634,7 @@ static void periodic_timer_callback(void* arg) //10ms_timer
 		tx_buf[8] = (uint8_t)(euler.r/16);
 		tx_buf[9] = (uint8_t)((euler.p/16)>>8);
 		tx_buf[10] = (uint8_t)(euler.p/16);
-		tx_buf[11] = (uint8_t) ext_btn_press;
+		tx_buf[11] = (uint8_t) 0;
 		tx_buf[12] = 0x55;
 		tx_buf[13] = 0xa9;
 		if(is_connected)
@@ -670,9 +651,30 @@ uint adc_reading = 0;
 
 RTC_DATA_ATTR int wakeup_cnt;
 bno055_chip_info_t bno_info;
+static const char *TAG = "bno055";
 
 esp_timer_handle_t periodic_timer;
+static i2c_dev_t i2c_switch = { 0 };
 
+typedef struct
+{
+    i2c_dev_t i2c_dev;
+}bno055_dev_t;
+
+static bno055_dev_t sensors[SENSOR_COUNT] = { 0 };
+
+esp_err_t bno055_init_desc(bno055_dev_t *dev, i2c_port_t port, gpio_num_t sda_gpio, gpio_num_t scl_gpio)
+{
+    dev->i2c_dev.port = port;
+    dev->i2c_dev.addr = BNO055_ADDRESS_A;
+    dev->i2c_dev.cfg.sda_io_num = sda_gpio;
+    dev->i2c_dev.cfg.scl_io_num = scl_gpio;
+#if HELPER_TARGET_IS_ESP32
+    dev->i2c_dev.cfg.master.clk_speed = 1000000;
+#endif
+
+    return i2c_dev_create_mutex(&dev->i2c_dev);
+}
 
 void app_main(void)
 {
@@ -698,6 +700,34 @@ void app_main(void)
 
     adc_init();
     custom_gpio_config();
+
+    esp_err_t err;
+    uint8_t reg_val;
+
+    i2cdev_init();
+
+    for (size_t i = 0; i < SENSOR_COUNT; i++)
+    {
+    	bno055_init_desc(&sensors[i],0,19,18);
+    }
+
+    tca9548_init_desc(&i2c_switch, 0x70, 0, 19, 18);
+    for(uint8_t i=0;i<SENSOR_COUNT;i++)
+    {
+    	tca9548_set_channels(&i2c_switch, BIT(i));
+        err = bno055_read_register(0, BNO055_CHIP_ID_ADDR, &reg_val);
+
+        if( err == ESP_OK ) {
+
+            ESP_LOGD(TAG, "BNO055 ID returned 0x%02X", reg_val);
+            if( reg_val == BNO055_ID ) {
+                ESP_LOGI(TAG, "BNO055 detected \n");
+            }
+            else {
+                ESP_LOGE(TAG, "bno055_open() error: BNO055 NOT detected");
+            }
+        }
+    }
 #ifdef bno055_use1
     bno055_config_t bno_conf;
     i2c_number_t i2c_num = 0;
@@ -780,7 +810,7 @@ void app_main(void)
          //Convert adc_reading to voltage in mV
          voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars) * 3;
          //ESP_LOGI(TAG,"Raw: %d\tVoltage: %dmV\n", adc_reading, voltage);
-         printf("CHRG: %d, %d, USB: %d\n",gpio_get_level(CHRG), voltage, gpio_get_level(USB_DETECT));
+         printf("CHRG: %d, %d, USB Detect: %c\n",gpio_get_level(CHRG), voltage, gpio_get_level(USB_DETECT)?'N':'Y');
 
 		 if(gpio_get_level(BUTTON_IO_NUM) != 0)
 		 {
@@ -860,8 +890,6 @@ void custom_gpio_config()
     gpio_set_direction(CHRG, GPIO_MODE_DEF_INPUT); // CHRG
     gpio_set_direction(USB_DETECT, GPIO_MODE_DEF_INPUT); // USB
     gpio_set_direction(BUTTON_IO_NUM, GPIO_MODE_DEF_INPUT); // BTN
-    gpio_set_direction(BUTTON_EXT_IO_NUM, GPIO_MODE_DEF_INPUT); // BTN
-    gpio_set_direction(HAPTIC, GPIO_MODE_DEF_OUTPUT); //HAPTIC
 
     gpio_set_pull_mode(LED_R, GPIO_PULLDOWN_ONLY);
     gpio_set_pull_mode(LED_G, GPIO_PULLDOWN_ONLY);
@@ -869,7 +897,5 @@ void custom_gpio_config()
     gpio_set_pull_mode(CHRG, GPIO_PULLUP_ONLY);
     gpio_set_pull_mode(USB_DETECT, GPIO_PULLUP_ONLY);
     gpio_set_pull_mode(BUTTON_IO_NUM, GPIO_PULLDOWN_ONLY);
-    gpio_set_pull_mode(BUTTON_EXT_IO_NUM, GPIO_PULLDOWN_ONLY);
-    gpio_set_pull_mode(HAPTIC, GPIO_PULLDOWN_ONLY);
 }
 

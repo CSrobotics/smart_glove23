@@ -265,6 +265,13 @@ typedef struct {
     double  z;
 } bno055_vec3_t;
 
+typedef struct
+{
+    bno055_addr_t  i2c_address; // BNO055_ADDRESS_A or BNO055_ADDRESS_B
+    bool  bno_is_open;
+} bno055_device_t;
+
+static bno055_device_t x_bno_dev[I2C_NUM_MAX];
 
 esp_err_t bno055_set_default_conf(bno055_config_t * p_bno_conf);
 

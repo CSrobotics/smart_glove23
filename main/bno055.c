@@ -20,16 +20,7 @@
 
    
 static const char *TAG = "bno055";
-   
-    
-typedef struct
-{
-    bno055_addr_t  i2c_address; // BNO055_ADDRESS_A or BNO055_ADDRESS_B
-    bool  bno_is_open;
-} bno055_device_t;
 
-
-static bno055_device_t x_bno_dev[I2C_NUM_MAX];
 
 static uint8_t x_buffer[200];  // we so far are using only 20 bytes max
 
@@ -43,10 +34,10 @@ static uint8_t x_buffer[200];  // we so far are using only 20 bytes max
 // --------|-----------------------------------|-------------------|------|
 esp_err_t bno055_read_register(i2c_number_t i2c_num, bno055_reg_t reg, uint8_t *p_reg_val){
     
-    if( !x_bno_dev[i2c_num].bno_is_open) {
-        ESP_LOGE(TAG, "bno055_read_register(): device is not open");
-        return BNO_ERR_NOT_OPEN; //TODO: make error list
-    }
+//    if( !x_bno_dev[i2c_num].bno_is_open) {
+//        ESP_LOGE(TAG, "bno055_read_register(): device is not open");
+//        return BNO_ERR_NOT_OPEN; //TODO: make error list
+//    }
 
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     
