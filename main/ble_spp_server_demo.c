@@ -9,8 +9,7 @@ void adc_init();
 void custom_gpio_config();
 esp_timer_handle_t periodic_timer;
 
-void xyz2rgb(float x, float y, float z, float *r, float *g, float *b);
-void matMult(float m2[3], float m1[3][3], float r[3]);
+i2c_number_t i2c_num = 0;
 
 /// SPP Service
 static const uint16_t spp_service_uuid = 0xABF0;
@@ -41,7 +40,7 @@ static const uint8_t spp_adv_data[20] = {
     /* Complete List of 16-bit Service Class UUIDs */
     0x03,0x03,0xF0,0xAB,
     /* Complete Local Name in advertising */
-    0x0B,0x09, 'S', 'M', 'A', 'R', 'T', '_', 'G', 'L', 'O', 'V', 'E'
+    0x0C,0x09, 'S', 'M', 'A', 'R', 'T', '_', 'G', 'L', 'O', 'V', 'E'
 };
 
 static uint16_t spp_mtu_size = 23;
@@ -317,7 +316,7 @@ void spp_cmd_task(void * arg)
 
     for(;;){
         vTaskDelay(50 / portTICK_PERIOD_MS);
-        if(xQueueReceive(cmd_cmd_queue, &cmd_id, portMAX_DELAY)) { //앱에서 ABF3에서 보내면 내용은 cmd_id에 있음
+        if(xQueueReceive(cmd_cmd_queue, &cmd_id, portMAX_DELAY)) {
             esp_log_buffer_char("ABF3 COMMAND",(char *)(cmd_id),strlen((char *)cmd_id));
             free(cmd_id);
         }
@@ -550,6 +549,7 @@ void print_wakeup_reason()
     }
 }
 
+static i2c_dev_t i2c_switch = { 0 };
 
 void SleepAndWakeup( void )
 {
@@ -579,19 +579,25 @@ void SleepAndWakeup( void )
 
     gpio_wakeup_enable(BUTTON_IO_NUM,GPIO_INTR_HIGH_LEVEL);
     gpio_wakeup_enable(USB_DETECT,GPIO_INTR_LOW_LEVEL);
-
-    bno055_set_power_mode(0, POWER_MODE_SUSPEND);
+    for (size_t i = 0; i < SENSOR_COUNT; i++)
+    {
+    	ESP_ERROR_CHECK(tca9548_set_channels(&i2c_switch, BIT(i)));
+    	bno055_set_power_mode(i2c_num, POWER_MODE_SUSPEND);
+    }
     /* Wake up in 2 seconds, or when button is pressed */
     //esp_sleep_enable_timer_wakeup(2000000);
     esp_sleep_enable_gpio_wakeup();
 
-    //gpio_set_level(USB_DETECT, 1);
-    //gpio_set_level(BUTTON_IO_NUM, 0);
     ESP_LOGI(GATTS_TABLE_TAG, "sleep start");
     vTaskDelay(pdMS_TO_TICKS(10));
     /* Enter sleep mode */
     esp_light_sleep_start();
-
+    for (size_t i = 0; i < SENSOR_COUNT; i++)
+    {
+    	ESP_ERROR_CHECK(tca9548_set_channels(&i2c_switch, BIT(i)));
+    	bno055_set_power_mode(i2c_num, POWER_MODE_NORMAL);
+    	bno055_set_opmode(i2c_num, OPERATION_MODE_NDOF);
+    }
     esp_timer_start_periodic(periodic_timer, 10000); //10ms
     ESP_LOGI(GATTS_TABLE_TAG, "Wakeup End");
     //esp_deep_sleep(1000);
@@ -633,9 +639,6 @@ esp_err_t bno_err;
 bno055_euler_t euler[6];
 
 esp_timer_handle_t periodic_timer;
-static i2c_dev_t i2c_switch = { 0 };
-bno055_device_t sensors[SENSOR_COUNT] = {0, };
-i2c_number_t i2c_num = 0;
 
 static void periodic_timer_callback(void* arg) //10ms_timer
 {
@@ -666,7 +669,7 @@ static void periodic_timer_callback(void* arg) //10ms_timer
 			esp_ble_gatts_send_indicate(spp_gatts_if, spp_conn_id, spp_handle_table[SPP_IDX_SPP_DATA_NTY_VAL], 12, tx_buf, false);
 		}
     }
-    vTaskDelay(pdMS_TO_TICKS(1));
+    vTaskDelay(pdMS_TO_TICKS(5));
 	//printf("%16lld\t%10d\t",time_mks, time_bno);
 	//printf("%.6f\t%.6f\t%.6f\t%.6f\n", quat.w, quat.x, quat.y, quat.z );
 }
@@ -765,7 +768,8 @@ void app_main(void)
     };
 
     ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
-    esp_timer_start_periodic(periodic_timer, 10000); //10ms
+    //esp_timer_start_periodic(periodic_timer, 1000000); //10ms
+
     while (1)
      {
          //ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
@@ -785,7 +789,7 @@ void app_main(void)
 		 if(gpio_get_level(BUTTON_IO_NUM) != 0)
 		 {
 			 btn_cnt++;
-			 if(btn_cnt>3)
+			 if(btn_cnt>2)
 			 { // POwer off
 				 btn_cnt = 0;
 				 gpio_set_level(LED_R, 1);

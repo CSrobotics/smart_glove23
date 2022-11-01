@@ -439,3 +439,13 @@ esp_err_t bno055_read_euler_hrp(i2c_number_t i2c_num, bno055_euler_t *euler){
 	return ESP_OK;
 }
 
+esp_err_t bno055_set_power_mode(i2c_number_t i2c_num, bno055_powermode_t pw_mode){
+	esp_err_t err;
+
+	err=bno055_write_register(i2c_num, BNO055_OPR_MODE_ADDR, OPERATION_MODE_CONFIG);
+    vTaskDelay(10 / portTICK_RATE_MS);
+    err=bno055_write_register(i2c_num, BNO055_PWR_MODE_ADDR, pw_mode);
+    vTaskDelay(10 / portTICK_RATE_MS);
+    return err;
+}
+

@@ -281,6 +281,7 @@ esp_err_t bno055_close (i2c_number_t i2c_num );
 esp_err_t bno055_get_chip_info(i2c_number_t i2c_num, bno055_chip_info_t* chip_inf);
 void bno055_displ_chip_info(uint8_t multi_sensor, bno055_chip_info_t chip_inf);
 esp_err_t bno055_set_opmode(i2c_number_t i2c_num, bno055_opmode_t mode );
+esp_err_t bno055_set_power_mode(i2c_number_t i2c_num, bno055_powermode_t pw_mode);
 esp_err_t bno055_get_opmode(i2c_number_t i2c_num, bno055_opmode_t * mode );
 esp_err_t bno055_set_ext_crystal_use(i2c_number_t i2c_num, bool use_ext );
 esp_err_t bno055_get_temperature(i2c_number_t i2c_num, uint8_t* temperature);
@@ -338,5 +339,6 @@ esp_err_t bno055_get_gravity(i2c_number_t i2c_num, bno055_vec3_t* gravity);
 esp_err_t bno055_get_fusion_data(i2c_number_t i2c_num, bno055_quaternion_t* quat, bno055_vec3_t* lin_accel, bno055_vec3_t* gravity);
 esp_err_t bno055_read_euler_h(i2c_number_t i2c_num, int16_t *euler_h_s16);
 esp_err_t bno055_read_euler_hrp(i2c_number_t i2c_num, bno055_euler_t *euler);
+
 #endif // _BNO055_H_
 
