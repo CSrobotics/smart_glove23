@@ -268,7 +268,6 @@ static void print_write_buffer(void)
 }
 
 uint16_t weight =0;
-bno055_euler_t euler;
 uint32_t voltage = 0;
 
 void uart_task(void *pvParameters)
@@ -580,6 +579,8 @@ void SleepAndWakeup( void )
 
     gpio_wakeup_enable(BUTTON_IO_NUM,GPIO_INTR_HIGH_LEVEL);
     gpio_wakeup_enable(USB_DETECT,GPIO_INTR_LOW_LEVEL);
+
+    bno055_set_power_mode(0, POWER_MODE_SUSPEND);
     /* Wake up in 2 seconds, or when button is pressed */
     //esp_sleep_enable_timer_wakeup(2000000);
     esp_sleep_enable_gpio_wakeup();
@@ -629,44 +630,45 @@ static void print_char_val_type(esp_adc_cal_value_t val_type)
 uint ms10_cnt = 0;
 uint8_t tx_buf[14];
 esp_err_t bno_err;
+bno055_euler_t euler[6];
+
+esp_timer_handle_t periodic_timer;
+static i2c_dev_t i2c_switch = { 0 };
+bno055_device_t sensors[SENSOR_COUNT] = {0, };
+i2c_number_t i2c_num = 0;
+
 static void periodic_timer_callback(void* arg) //10ms_timer
 {
-
-	//bno_err = bno055_read_euler_hrp(0, &euler);
-
-//	if( bno_err != ESP_OK ) {
-//		printf("bno055_get_quaternion() returned error: %02x \n", bno_err);
-//		exit(2);
-//	}
-	//printf("%16lld\t%10d\t",time_mks, time_bno);
-	//printf("%.6f\t%.6f\t%.6f\t%.6f\n", quat.w, quat.x, quat.y, quat.z );
-	//printf("h: %3d r: %3d p: %3d\n",(euler.h/16),(euler.r/16),(euler.p/16));
-
-	ms10_cnt++;
-	if(ms10_cnt>9) // 100ms_timer
-	{
-		ms10_cnt = 0;
+    for (size_t i = 0; i < SENSOR_COUNT; i++)
+    {
+    	ESP_ERROR_CHECK(tca9548_set_channels(&i2c_switch, BIT(i)));
+    	bno_err = bno055_read_euler_hrp(0, &euler[i]);
+		if( bno_err != ESP_OK ) {
+			printf("bno055_get_quaternion() returned error: %02x \n", bno_err);
+			exit(2);
+		}
+		printf(" %d Sensor --> h: %.2f r: %.2f p: %.2f\n",i, (float)(euler[i].h/16),(float)(euler[i].r/16),(float)(euler[i].p/16));
 
 		tx_buf[0] = 0xfa;
-		tx_buf[1] = (uint8_t)(voltage >> 8);
-		tx_buf[2] = (uint8_t)(voltage);
-		tx_buf[3] = (uint8_t)(weight >> 8);
-		tx_buf[4] = (uint8_t)(weight);
-		tx_buf[5] = (uint8_t)((euler.h/16)>>8);
-		tx_buf[6] = (uint8_t)(euler.h/16);
-		tx_buf[7] = (uint8_t)((euler.r/16)>>8);
-		tx_buf[8] = (uint8_t)(euler.r/16);
-		tx_buf[9] = (uint8_t)((euler.p/16)>>8);
-		tx_buf[10] = (uint8_t)(euler.p/16);
-		tx_buf[11] = (uint8_t) 0;
-		tx_buf[12] = 0x55;
-		tx_buf[13] = 0xa9;
+		tx_buf[1] = (uint8_t)(i);
+		tx_buf[2] = (uint8_t)((euler[i].h/16)>>8);
+		tx_buf[3] = (uint8_t)(euler[i].h/16);
+		tx_buf[4] = (uint8_t)((euler[i].r/16)>>8);
+		tx_buf[5] = (uint8_t)(euler[i].r/16);
+		tx_buf[6] = (uint8_t)((euler[i].p/16)>>8);
+		tx_buf[7] = (uint8_t)(euler[i].p/16);
+		tx_buf[8] = (uint8_t)(voltage >> 8);
+		tx_buf[9] = (uint8_t)(voltage);
+		tx_buf[10] = 0x55;
+		tx_buf[11] = 0xa9;
 		if(is_connected)
 		{
-			esp_ble_gatts_send_indicate(spp_gatts_if, spp_conn_id, spp_handle_table[SPP_IDX_SPP_DATA_NTY_VAL], 14, tx_buf, false);
+			esp_ble_gatts_send_indicate(spp_gatts_if, spp_conn_id, spp_handle_table[SPP_IDX_SPP_DATA_NTY_VAL], 12, tx_buf, false);
 		}
-
-	}
+    }
+    vTaskDelay(pdMS_TO_TICKS(1));
+	//printf("%16lld\t%10d\t",time_mks, time_bno);
+	//printf("%.6f\t%.6f\t%.6f\t%.6f\n", quat.w, quat.x, quat.y, quat.z );
 }
 
 int btn_cnt = 0;
@@ -675,9 +677,6 @@ uint adc_reading = 0;
 
 RTC_DATA_ATTR int wakeup_cnt;
 bno055_chip_info_t bno_info;
-esp_timer_handle_t periodic_timer;
-static i2c_dev_t i2c_switch = { 0 };
-bno055_device_t sensors[SENSOR_COUNT] = {0, };
 
 void app_main(void)
 {
@@ -706,7 +705,6 @@ void app_main(void)
 
     esp_err_t err;
 
-    i2c_number_t i2c_num = 0;
     i2cdev_init();
 
     bno055_config_t bno_conf;
@@ -722,7 +720,7 @@ void app_main(void)
         printf(" Sensor %d : bno055_set_opmode(OPERATION_MODE_NDOF) returned 0x%02x \n",i, err);
         err = bno055_get_chip_info(i2c_num, &bno_info);
         bno055_displ_chip_info(i, bno_info);
-        vTaskDelay(500 / portTICK_RATE_MS);
+        vTaskDelay(200 / portTICK_RATE_MS);
     }
 
     ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
@@ -767,7 +765,7 @@ void app_main(void)
     };
 
     ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
-
+    esp_timer_start_periodic(periodic_timer, 10000); //10ms
     while (1)
      {
          //ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
@@ -782,7 +780,7 @@ void app_main(void)
          //Convert adc_reading to voltage in mV
          voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars) * 3;
          //ESP_LOGI(TAG,"Raw: %d\tVoltage: %dmV\n", adc_reading, voltage);
-         printf("CHRG: %d, %d, USB Detect: %c\n",gpio_get_level(CHRG), voltage, gpio_get_level(USB_DETECT)?'N':'Y');
+         //printf("CHRG: %d, %d, USB Detect: %c\n",gpio_get_level(CHRG), voltage, gpio_get_level(USB_DETECT)?'N':'Y');
 
 		 if(gpio_get_level(BUTTON_IO_NUM) != 0)
 		 {
