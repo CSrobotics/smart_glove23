@@ -448,4 +448,3 @@ esp_err_t bno055_set_power_mode(i2c_number_t i2c_num, bno055_powermode_t pw_mode
     vTaskDelay(10 / portTICK_RATE_MS);
     return err;
 }
-

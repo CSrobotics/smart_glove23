@@ -289,41 +289,6 @@ void uart_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-static void spp_uart_init(void)
-{
-    uart_config_t uart_config = {
-        .baud_rate = 115200,
-        .data_bits = UART_DATA_8_BITS,
-        .parity = UART_PARITY_DISABLE,
-        .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_RTS,
-        .rx_flow_ctrl_thresh = 122,
-        .source_clk = UART_SCLK_APB,
-    };
-
-    //Install UART driver, and get the queue.
-    uart_driver_install(UART_NUM_0, 4096, 8192, 10,&spp_uart_queue,0);
-    //Set UART parameters
-    uart_param_config(UART_NUM_0, &uart_config);
-    //Set UART pins
-    uart_set_pin(UART_NUM_0, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-    xTaskCreate(uart_task, "uTask", 2048, (void*)UART_NUM_0, 8, NULL);
-}
-
-void spp_cmd_task(void * arg)
-{
-    uint8_t * cmd_id;
-
-    for(;;){
-        vTaskDelay(50 / portTICK_PERIOD_MS);
-        if(xQueueReceive(cmd_cmd_queue, &cmd_id, portMAX_DELAY)) {
-            esp_log_buffer_char("ABF3 COMMAND",(char *)(cmd_id),strlen((char *)cmd_id));
-            free(cmd_id);
-        }
-    }
-    vTaskDelete(NULL);
-}
-
 static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
 {
     esp_err_t err;
@@ -633,6 +598,18 @@ static void print_char_val_type(esp_adc_cal_value_t val_type)
     }
 }
 
+uint32_t MAP(uint32_t au32_IN, uint32_t au32_INmin, uint32_t au32_INmax, uint32_t au32_OUTmin, uint32_t au32_OUTmax)
+{
+    return ((((au32_IN - au32_INmin)*(au32_OUTmax - au32_OUTmin))/(au32_INmax - au32_INmin)) + au32_OUTmin);
+}
+
+void swap(int16_t * a, int16_t * b)
+{
+	int16_t temp = *a;
+	*a = *b;
+	*b = temp;
+}
+
 uint ms10_cnt = 0;
 uint8_t tx_buf[14];
 esp_err_t bno_err;
@@ -650,7 +627,17 @@ static void periodic_timer_callback(void* arg) //10ms_timer
 			printf("bno055_get_quaternion() returned error: %02x \n", bno_err);
 			exit(2);
 		}
-		printf(" %d Sensor --> h: %.2f r: %.2f p: %.2f\n",i, (float)(euler[i].h/16),(float)(euler[i].r/16),(float)(euler[i].p/16));
+		if(i == 0)
+		{
+			euler[0].h += (90*16);
+			if((euler[0].h/16) > 359)
+			{
+				euler[0].h -= (359*16);
+			}
+			swap(&euler[0].r,&euler[0].p);
+			euler[0].p *= -1;
+		}
+		printf(" %d Sensor --> h: %.1f r: %.1f p: %.1f\n",i, (float)(euler[i].h/16.0),(float)(euler[i].r/16.0),(float)(euler[i].p/16.0));
 
 		tx_buf[0] = 0xfa;
 		tx_buf[1] = (uint8_t)(i);
@@ -673,6 +660,11 @@ static void periodic_timer_callback(void* arg) //10ms_timer
 	//printf("%16lld\t%10d\t",time_mks, time_bno);
 	//printf("%.6f\t%.6f\t%.6f\t%.6f\n", quat.w, quat.x, quat.y, quat.z );
 }
+
+//void ble_task()
+//{
+//
+//}
 
 int btn_cnt = 0;
 int btn_flag = 0;
@@ -715,7 +707,17 @@ void app_main(void)
 
     // Initialize descriptor of the I2C switch
     ESP_ERROR_CHECK(tca9548_init_desc(&i2c_switch, 0x70, 0, 19, 18));
-    for (size_t i = 0; i < SENSOR_COUNT; i++)
+    for (size_t i = 0; i < 1; i++)
+    {
+    	ESP_ERROR_CHECK(tca9548_set_channels(&i2c_switch, BIT(i)));
+        err = bno055_open(i2c_num, &bno_conf);
+        err = bno055_set_opmode(i2c_num, OPERATION_MODE_NDOF);
+        printf(" Sensor %d : bno055_set_opmode(OPERATION_MODE_NDOF) returned 0x%02x \n",i, err);
+        err = bno055_get_chip_info(i2c_num, &bno_info);
+        bno055_displ_chip_info(i, bno_info);
+        vTaskDelay(200 / portTICK_RATE_MS);
+    }
+    for (size_t i = 1; i < SENSOR_COUNT; i++)
     {
     	ESP_ERROR_CHECK(tca9548_set_channels(&i2c_switch, BIT(i)));
         err = bno055_open(i2c_num, &bno_conf);
@@ -756,10 +758,9 @@ void app_main(void)
     esp_ble_gap_register_callback(gap_event_handler);
     esp_ble_gatts_app_register(ESP_SPP_APP_ID);
 
-    spp_uart_init();
-
     cmd_cmd_queue = xQueueCreate(10, sizeof(uint32_t));
-    xTaskCreate(spp_cmd_task, "spp_cmd_task", 2048, NULL, 10, NULL);
+
+    //xTaskCreatePinnedToCore(ble_task, "ble_task", 4096, NULL, 10, NULL, 1);
 
     const esp_timer_create_args_t periodic_timer_args = {
             .callback = &periodic_timer_callback,
@@ -768,7 +769,7 @@ void app_main(void)
     };
 
     ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
-    //esp_timer_start_periodic(periodic_timer, 1000000); //10ms
+    esp_timer_start_periodic(periodic_timer, 1000000); //10ms
 
     while (1)
      {
