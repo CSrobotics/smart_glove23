@@ -515,6 +515,8 @@ void print_wakeup_reason()
 }
 
 static i2c_dev_t i2c_switch = { 0 };
+uint8_t calib, system_, gyro, accel, mag;
+esp_err_t err;
 
 void SleepAndWakeup( void )
 {
@@ -562,7 +564,18 @@ void SleepAndWakeup( void )
     	ESP_ERROR_CHECK(tca9548_set_channels(&i2c_switch, BIT(i)));
     	bno055_set_power_mode(i2c_num, POWER_MODE_NORMAL);
     	bno055_set_opmode(i2c_num, OPERATION_MODE_NDOF);
+		if(calib != 0xff)
+		{
+			 gpio_set_level(LED_R, 1);
+			err = bno055_get_calib_status_byte(i2c_num, &calib);
+			err = bno055_get_calib_status(i2c_num, &system_, &gyro, &accel, &mag);
+			if( err != ESP_OK ) {
+				printf("Program terminated!\n");
+			}
+			printf("%6d\t\t0x%X\t%1d\t%1d\t%1d\t%1d\n", i, calib, system_, gyro, accel, mag);
+		}
     }
+	gpio_set_level(LED_R, 0);
     esp_timer_start_periodic(periodic_timer, 10000); //10ms
     ESP_LOGI(GATTS_TABLE_TAG, "Wakeup End");
     //esp_deep_sleep(1000);
@@ -653,12 +666,14 @@ static void periodic_timer_callback(void* arg) //10ms_timer
 		tx_buf[11] = 0xa9;
 		if(is_connected)
 		{
-			esp_ble_gatts_send_indicate(spp_gatts_if, spp_conn_id, spp_handle_table[SPP_IDX_SPP_DATA_NTY_VAL], 12, tx_buf, false);
+			err = esp_ble_gatts_send_indicate(spp_gatts_if, spp_conn_id, spp_handle_table[SPP_IDX_SPP_DATA_NTY_VAL], 12, tx_buf, false);
+			if( err != ESP_OK )
+			{
+				printf("BLE Sending Fail\n");
+			}
 		}
+	    vTaskDelay(pdMS_TO_TICKS(10));
     }
-    vTaskDelay(pdMS_TO_TICKS(5));
-	//printf("%16lld\t%10d\t",time_mks, time_bno);
-	//printf("%.6f\t%.6f\t%.6f\t%.6f\n", quat.w, quat.x, quat.y, quat.z );
 }
 
 //void ble_task()
@@ -707,16 +722,6 @@ void app_main(void)
 
     // Initialize descriptor of the I2C switch
     ESP_ERROR_CHECK(tca9548_init_desc(&i2c_switch, 0x70, 0, 19, 18));
-    for (size_t i = 0; i < 1; i++)
-    {
-    	ESP_ERROR_CHECK(tca9548_set_channels(&i2c_switch, BIT(i)));
-        err = bno055_open(i2c_num, &bno_conf);
-        err = bno055_set_opmode(i2c_num, OPERATION_MODE_NDOF);
-        printf(" Sensor %d : bno055_set_opmode(OPERATION_MODE_NDOF) returned 0x%02x \n",i, err);
-        err = bno055_get_chip_info(i2c_num, &bno_info);
-        bno055_displ_chip_info(i, bno_info);
-        vTaskDelay(200 / portTICK_RATE_MS);
-    }
     for (size_t i = 1; i < SENSOR_COUNT; i++)
     {
     	ESP_ERROR_CHECK(tca9548_set_channels(&i2c_switch, BIT(i)));
@@ -725,7 +730,17 @@ void app_main(void)
         printf(" Sensor %d : bno055_set_opmode(OPERATION_MODE_NDOF) returned 0x%02x \n",i, err);
         err = bno055_get_chip_info(i2c_num, &bno_info);
         bno055_displ_chip_info(i, bno_info);
-        vTaskDelay(200 / portTICK_RATE_MS);
+        vTaskDelay(100 / portTICK_RATE_MS);
+
+		if(calib != 0xff)
+		{
+			err = bno055_get_calib_status_byte(i2c_num, &calib);
+			err = bno055_get_calib_status(i2c_num, &system_, &gyro, &accel, &mag);
+			if( err != ESP_OK ) {
+				printf("Program terminated!\n");
+			}
+			printf("%6d\t\t0x%X\t%1d\t%1d\t%1d\t%1d\n", i, calib, system_, gyro, accel, mag);
+		}
     }
 
     ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
@@ -769,7 +784,7 @@ void app_main(void)
     };
 
     ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
-    esp_timer_start_periodic(periodic_timer, 1000000); //10ms
+    esp_timer_start_periodic(periodic_timer, 10000); //10ms
 
     while (1)
      {

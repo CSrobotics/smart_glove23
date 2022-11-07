@@ -448,3 +448,34 @@ esp_err_t bno055_set_power_mode(i2c_number_t i2c_num, bno055_powermode_t pw_mode
     vTaskDelay(10 / portTICK_RATE_MS);
     return err;
 }
+
+esp_err_t bno055_get_calib_acc(i2c_number_t i2c_num, bno055_euler_t *euler){
+	esp_err_t err = bno055_read_data(i2c_num, BNO055_EULER_H_LSB_ADDR, x_buffer, 6);
+	if( err != ESP_OK ) return err;
+
+	euler->h = (((uint16_t)x_buffer[1]) << 8) | ((uint16_t)x_buffer[0]);
+	euler->r = (((uint16_t)x_buffer[3]) << 8) | ((uint16_t)x_buffer[2]);
+	euler->p = (((uint16_t)x_buffer[5]) << 8) | ((uint16_t)x_buffer[4]);
+	return ESP_OK;
+}
+
+esp_err_t bno055_get_calib_status_byte(i2c_number_t i2c_num, uint8_t* calib) {
+	esp_err_t err;
+	err = bno055_read_register(i2c_num, BNO055_CALIB_STAT_ADDR, calib);
+    return err;
+}
+
+esp_err_t bno055_get_calib_status(i2c_number_t i2c_num, uint8_t* sys, uint8_t* gyro, uint8_t* accel, uint8_t* mag) {
+
+    uint8_t calib_status;
+	esp_err_t err;
+	err = bno055_read_register(i2c_num, BNO055_CALIB_STAT_ADDR, &calib_status);
+    if( err != ESP_OK ) return err;
+
+    *sys = (calib_status >> 6) & 0x03;
+    *gyro = (calib_status >> 4) & 0x03;
+    *accel = (calib_status >> 2) & 0x03;
+    *mag = calib_status & 0x03;
+
+    return ESP_OK;
+}
